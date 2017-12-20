@@ -54,22 +54,23 @@
       <div class="container">
         <div class="row">
           <div class="col">
-            <h1 class="mt-5">what's going on in your neighborhood?</h1>
+            <h1 class="mt-5">neighborhood watch</h1>
             <input id="pac-input" class="controls" type="text"
                     placeholder="Enter a location">
+            <div id="hist_stats" class=".col-lg-12"></div>
+            <div id="map" class="col-md-12"></div>
           </div>
-          <div id="map" class="col-lg-12"></div>
         </div>
       </div>
     </section>
 
     <!-- Bootstrap core JavaScript -->
     <script src="jquery.js"></script>
-
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script async defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeB2kTnW-E7eM6NtvRaYBbHTz4X4UZ6Yo&libraries=places,geometry">
     </script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="index.js"></script>
   </body>
 
