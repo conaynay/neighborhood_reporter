@@ -3,10 +3,32 @@ var crimes = [];
 var month_array = ["Month","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var year_array = [];
 var monthData = [];
+var no_crimes = 0;
+var currentDate = new Date();
+var startDate = new Date();
+var whenString = "";
+  console.log(currentDate);
+  console.log("Here is the current date’s year");
+  console.log(currentDate.getFullYear());
+
+startDate.setFullYear(currentDate.getFullYear() - 1);
+// startDate.setMonth(1);
+  console.log("Here is the current date’s year minus 1");
+  console.log(startDate.getFullYear());
+  console.log(startDate);
+
+var newDate = currentDate.toISOString().split(".")[0];
+var refDate = startDate.toISOString().split(".")[0];
+
+  console.log("Today’s date:");
+  console.log(newDate);
+
+  console.log("Reference Date:")
+  console.log(refDate);
 
 // Initialize google map and find the crimes!
 function initMap() {
-  findCrimes();
+  $(hist_stats).hide();
 
   // Assign center los angeles to new google map and get user input location
   var losAngeles = {lat: 34.048868, lng: -118.252829};
@@ -22,7 +44,7 @@ function initMap() {
     new google.maps.LatLng(33.3427,-118.8513),
     new google.maps.LatLng(34.8146,-117.6596)
     );
-    console.log('LAcoordinates is: ' + JSON.stringify(LAcoordinates));
+  console.log('LAcoordinates is: ' + JSON.stringify(LAcoordinates));
 
   //sets up autocomplete feature with options specified
   var options = {
@@ -45,7 +67,7 @@ function initMap() {
     })
   }
 
-  // Create a listener called 'place_changed' and create place variable
+  // Create a listener event called 'place_changed' and create place variable
   autocomplete.addListener('place_changed', function() {
     var place = autocomplete.getPlace();
 
@@ -85,20 +107,28 @@ function initMap() {
     // Get bounds of window and check if each crimeMarker in crimeSpots is within getBounds
     // then push a new marker into the crimeMarkers array and map it
     var currentBounds = map.getBounds();
-
+    console.log("currentBounds is: ");
+    console.log(currentBounds);
+    console.log(currentBounds.f.f);
+    console.log(currentBounds.b.b);
+    console.log(currentBounds.f.b);
+    console.log(currentBounds.b.f);
+    console.log("end");
+    console.log(JSON.stringify(place.geometry.location));
+    var location_point = {
+      "type": "Point",
+      "coordinates": [place.geometry.location.lat()
+                    ,place.geometry.location.lng()]};
+    console.log(location_point);
+    console.log(JSON.stringify(location_point));
+    whenString = "date_occ between '"+refDate+"' and '"+newDate+"' and within_box(location_1,"+currentBounds.f.f+","+currentBounds.b.b+","+currentBounds.f.b+","+currentBounds.b.f+")";
+      console.log("decoded string:");
+      console.log(whenString);
+    findCrimes();
     var DR_numbers = [];
     var months = [];
     var years = [];
-    // crimeSpots.forEach(function(crimeMarker){
-    //   if (currentBounds.contains(crimeMarker)) {
-    //     crimeMarkers.push(new google.maps.Marker({
-    //       map: map,
-    //       position: new google.maps.LatLng(crimeMarker.lat,crimeMarker.lng),
-    //       icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
-    //       }));
-    //       }
-    //     })
-    //   });
+
     crimes.forEach(function(crimeMarker){
       if (currentBounds.contains(new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]))) {
         crimeMarkers.push(new google.maps.Marker({
@@ -113,13 +143,14 @@ function initMap() {
       })
     // console.log(monthly_data);
     console.log(DR_numbers.length);
+
     getMonthData(months,years,DR_numbers);
     console.log("getMOnth ran");
+
     google.charts.load('current', {'packages':['corechart']});
     // google.charts.setOnLoadCallback(drawVisualization);
 
     var currentData = [];
-    var no_crimes = 0;
     currentData.push(year_array);
     for(i=0;i<monthData.length;i++){currentData.push(monthData[i])}
     google.charts.setOnLoadCallback(drawVisualization);
@@ -142,6 +173,7 @@ function initMap() {
     var chart = new google.visualization.ComboChart(document.getElementById('hist_stats'));
     chart.draw(currentData, options);
   }
+    $(hist_stats).show();
 
 
     console.log(typeof currentData);
@@ -319,13 +351,14 @@ function getMonthData(months,years,DR_numbers){
       no_crimes += 1;
     }
     // else {
-    //   console.log("could not getMonthData for: " + years[i] + " in " + DR_numbers[i]);
+    //   // console.log("could not getMonthData for: " + years[i] + " in " + DR_numbers[i]);
+    //   return no_crimes
     // }
   }
   var current_max = 0;
   for (i = 0; i < monthData.length; i++){
     var sum = monthData[i][1]+monthData[i][2]+monthData[i][3]+monthData[i][4]+monthData[i][5];
-    if (sum > current_max) {current_max = sum}
+    // if (sum > current_max) {current_max = sum} *********PICK UP HERE***********************************************************************************
     var count = 0;
     for (j=1;j<monthData[i].length;j++){
       if (monthData[i][j] > 0){
@@ -340,13 +373,16 @@ function getMonthData(months,years,DR_numbers){
 
 function findCrimes() {
   $.ajax({
-      url: "https://data.lacity.org/resource/7fvc-faax.json",
+      url: `https://data.lacity.org/resource/7fvc-faax.json`,
+      // ?$where=date between '2015-01-10T12:00:00' and '2015-01-10T14:00:00'
       type: "GET",
       data: {
-        "$limit" : 100000,
-        "$$app_token" : "Dhj5YCkjjtNfUHELSklScfzCw"
+        "$limit" : 10000,
+        "$$app_token" : "Dhj5YCkjjtNfUHELSklScfzCw",
+        "$where"  : whenString
       }
     }).done(function(data) {
+      crimes = [];
       data.forEach(function(item){
         // console.log(item.dr_no);
         if (item.location_1){
@@ -367,17 +403,17 @@ function findCrimes() {
           "gender_sex": item.vict_sex,
           "lat":item.location_1.coordinates[1],
           "lng":item.location_1.coordinates[0]
-          //170713038
-          //for (i=0;i<crimes.length;i++){if(crimes[i]["DR_number"] === '170713038'){console.log(crimes[i]);}}
           })
         }
         });
+        console.log("crimes is: ");
         console.log(crimes);
       return crimes;
     });
 }
 
 function renderPage() {
+  // getDate();
   google.charts.load('current', {'packages':['corechart']});
   initMap();
   // handleStart();

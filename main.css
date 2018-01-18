@@ -4,8 +4,8 @@
 }
 
 body {
-  background: url('http://placehold.it/1920x1080') no-repeat center center fixed;
-  /*background-color: #212529;*/
+  /* background: url('http://placehold.it/1920x1080') no-repeat center center fixed; */
+  background-color: #A9A9A9;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
