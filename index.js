@@ -1,3 +1,4 @@
+var input = document.getElementById('pac-input');
 var crimeSpots = [];
 var crimes = [];
 var month_array = ["Month","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -10,33 +11,33 @@ var whenString = "";
   console.log(currentDate);
   console.log("Here is the current date’s year");
   console.log(currentDate.getFullYear());
+var losAngeles = {lat: 34.048868, lng: -118.252829};
+// Creates arrays for autocomplete listener
+var placeMarker;
+var crimeMarkers = [];
+var place;
 
 startDate.setFullYear(currentDate.getFullYear() - 1);
-// startDate.setMonth(1);
   console.log("Here is the current date’s year minus 1");
   console.log(startDate.getFullYear());
   console.log(startDate);
 
 var newDate = currentDate.toISOString().split(".")[0];
 var refDate = startDate.toISOString().split(".")[0];
-
   console.log("Today’s date:");
   console.log(newDate);
-
   console.log("Reference Date:")
   console.log(refDate);
 
-// Initialize google map and find the crimes!
+// Initialize google map and find the crimes
 function initMap() {
   $(hist_stats).hide();
-
+  $(map).hide();
   // Assign center los angeles to new google map and get user input location
-  var losAngeles = {lat: 34.048868, lng: -118.252829};
   var map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 10,
+    zoom: 11,
     center: losAngeles
     });
-  var input = document.getElementById('pac-input');
 
   // Creates a LatLngBounds object to use as a bounds area for autocomplete
   // Uses northeast and southwest coordinates
@@ -44,38 +45,23 @@ function initMap() {
     new google.maps.LatLng(33.3427,-118.8513),
     new google.maps.LatLng(34.8146,-117.6596)
     );
-  console.log('LAcoordinates is: ' + JSON.stringify(LAcoordinates));
+    console.log('LAcoordinates is: ' + JSON.stringify(LAcoordinates));
 
   //sets up autocomplete feature with options specified
-  var options = {
+  var mapOptions = {
     bounds: LAcoordinates,
     strictBounds: true
     };
-  var autocomplete = new google.maps.places.Autocomplete(input,options);
-
-  // Creates arrays for autocomplete listener
-  var placeMarker;
-  var crimeMarkers = [];
-
-  // Function to set placeMarker and crimeMarkers array on map
-  function setMapOnPlace() {
-    placeMarker.setMap();
-    }
-  function setMapOnCrime() {
-    crimeMarkers.forEach(function(crime){
-      crime.setMap(null);
-    })
-  }
+  var autocomplete = new google.maps.places.Autocomplete(input,mapOptions);
 
   // Create a listener event called 'place_changed' and create place variable
   autocomplete.addListener('place_changed', function() {
-    var place = autocomplete.getPlace();
+    place = autocomplete.getPlace();
 
     // User entered the name of a Place that was not suggested and
     // pressed the Enter key, or the Place Details request failed.
     if (!place.geometry) {
       window.alert(place.name + " is outside of the acceptable LA boundary");
-      return;
       }
 
     // If placeMarker and crimeMarkers have value then make values null/empty.
@@ -89,10 +75,6 @@ function initMap() {
         crimeMarkers = [];
       }
 
-    // Set map to center of place variable and zoom
-    map.setCenter(place.geometry.location);
-    map.setZoom(15);
-
     // Set marker for place variable with selected parameters
     // zIndex establishes view order for marker to bring it to top
     placeMarker = new google.maps.Marker({
@@ -104,31 +86,26 @@ function initMap() {
       console.log(place.geometry.location.lat());
       console.log(place.geometry.location.lng());
 
-    // Get bounds of window and check if each crimeMarker in crimeSpots is within getBounds
-    // then push a new marker into the crimeMarkers array and map it
+    // Get window bounds and plug into whenString parameter for ajax call in findCrimes
     var currentBounds = map.getBounds();
-    console.log("currentBounds is: ");
-    console.log(currentBounds);
-    console.log(currentBounds.f.f);
-    console.log(currentBounds.b.b);
-    console.log(currentBounds.f.b);
-    console.log(currentBounds.b.f);
-    console.log("end");
-    console.log(JSON.stringify(place.geometry.location));
-    var location_point = {
-      "type": "Point",
-      "coordinates": [place.geometry.location.lat()
-                    ,place.geometry.location.lng()]};
-    console.log(location_point);
-    console.log(JSON.stringify(location_point));
+      console.log("currentBounds is: ");
+      console.log(currentBounds);
+      console.log(currentBounds.f.f);
+      console.log(currentBounds.b.b);
+      console.log(currentBounds.f.b);
+      console.log(currentBounds.b.f);
+      console.log(JSON.stringify(place.geometry.location));
+      console.log("end");
     whenString = "date_occ between '"+refDate+"' and '"+newDate+"' and within_box(location_1,"+currentBounds.f.f+","+currentBounds.b.b+","+currentBounds.f.b+","+currentBounds.b.f+")";
       console.log("decoded string:");
       console.log(whenString);
     findCrimes();
+
+    // Create blank arrays to push data into the chart
+    // Runs through crimes array, if data is within window bounds, then populate chart arrays
     var DR_numbers = [];
     var months = [];
     var years = [];
-
     crimes.forEach(function(crimeMarker){
       if (currentBounds.contains(new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]))) {
         crimeMarkers.push(new google.maps.Marker({
@@ -158,7 +135,7 @@ function initMap() {
     function drawVisualization() {
     currentData = google.visualization.arrayToDataTable(currentData);
 
-    var options = {
+    var chartOptions = {
       title : 'has it gotten better?',
       color: 'red',
       lineWidth: 2,
@@ -166,23 +143,26 @@ function initMap() {
       hAxis: {title: 'Month', gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
       seriesType: 'bars',
       backgroundColor: '#212529',
-      series: {5: {type: 'line', pointShape: 'star', pointSize: 20, color: '#E5E5E5'}},
+      series: {3: {type: 'line', pointShape: 'triangle', pointSize: 10, color: '#E5E5E5'}},
       legend: {position: 'top', textStyle: {color: '#E5E5E5', fontSize: 16}, alignment: 'center'}
       };
 
     var chart = new google.visualization.ComboChart(document.getElementById('hist_stats'));
-    chart.draw(currentData, options);
-  }
+    chart.draw(currentData, chartOptions);
+  };
     $(hist_stats).show();
-
 
     console.log(typeof currentData);
     console.log(currentData);
     console.log("updated_visualization");
 
+    // Set map to center of place variable and zoom
+    map.setCenter(place.geometry.location);
+    map.setZoom(15);
+    // $(map).show();
+
     // END add listener function
     });
-
 
 }
 
@@ -314,40 +294,32 @@ function getYear(date){
 }
 function getMonthData(months,years,DR_numbers){
   var max_year = Math.max.apply(null,years);
-  year_array = ["month",(max_year-4).toString(),(max_year-3).toString(),(max_year-2).toString(),(max_year-1).toString(),max_year.toString()];
+  year_array = ["month",(max_year-2).toString(),(max_year-1).toString(),max_year.toString()];
   monthData = [
-      ["jan",0,0,0,0,0],
-      ["feb",0,0,0,0,0],
-      ["mar",0,0,0,0,0],
-      ["apr",0,0,0,0,0],
-      ["may",0,0,0,0,0],
-      ["jun",0,0,0,0,0],
-      ["jul",0,0,0,0,0],
-      ["aug",0,0,0,0,0],
-      ["sep",0,0,0,0,0],
-      ["oct",0,0,0,0,0],
-      ["nov",0,0,0,0,0],
-      ["dec",0,0,0,0,0]
+      ["jan",0,0,0],
+      ["feb",0,0,0],
+      ["mar",0,0,0],
+      ["apr",0,0,0],
+      ["may",0,0,0],
+      ["jun",0,0,0],
+      ["jul",0,0,0],
+      ["aug",0,0,0],
+      ["sep",0,0,0],
+      ["oct",0,0,0],
+      ["nov",0,0,0],
+      ["dec",0,0,0],
       ];
   for (i = 0; i < years.length; i++) {
-    if(years[i] === max_year - 4) {
+    if(years[i] === max_year - 2) {
       monthData[months[i]-1][1] += 1;
       no_crimes += 1;
     }
-    else if(years[i] === max_year - 3) {
+    else if(years[i] === max_year - 1) {
       monthData[months[i]-1][2] += 1;
       no_crimes += 1;
     }
-    else if(years[i] === max_year - 2) {
-      monthData[months[i]-1][3] += 1;
-      no_crimes += 1;
-    }
-    else if(years[i] === max_year - 1) {
-      monthData[months[i]-1][4] += 1;
-      no_crimes += 1;
-    }
     else if(years[i] === max_year) {
-      monthData[months[i]-1][5] += 1;
+      monthData[months[i]-1][3] += 1;
       no_crimes += 1;
     }
     // else {
@@ -370,7 +342,15 @@ function getMonthData(months,years,DR_numbers){
   }
   year_array.push("avg");
 }
-
+// Function to set placeMarker and crimeMarkers array on map
+function setMapOnPlace() {
+  placeMarker.setMap();
+  }
+function setMapOnCrime() {
+  crimeMarkers.forEach(function(crime){
+    crime.setMap(null);
+  })
+  }
 function findCrimes() {
   $.ajax({
       url: `https://data.lacity.org/resource/7fvc-faax.json`,
@@ -413,15 +393,8 @@ function findCrimes() {
 }
 
 function renderPage() {
-  // getDate();
   google.charts.load('current', {'packages':['corechart']});
   initMap();
-  // handleStart();
-  // handleCrimeClick();
-  // handleArrestClick();
-  // handleVehiclePedestrianClick();
-  // handleAllClick();
-  // handleZipSubmit();
 }
 
 $(renderPage);
