@@ -6,21 +6,23 @@ var year_array = [];
 var monthData = [];
 var no_crimes = 0;
 var currentDate = new Date();
-var startDate = new Date();
 var whenString = "";
   console.log(currentDate);
   console.log("Here is the current date’s year");
   console.log(currentDate.getFullYear());
 var losAngeles = {lat: 34.048868, lng: -118.252829};
-// Creates arrays for autocomplete listener
 var placeMarker;
 var crimeMarkers = [];
 var place;
-
-startDate.setFullYear(currentDate.getFullYear() - 1);
-  console.log("Here is the current date’s year minus 1");
-  console.log(startDate.getFullYear());
-  console.log(startDate);
+var map;
+var LAcoordinates;
+var DR_numbers = [];
+var months = [];
+var years = [];
+var startDate = new Date(currentDate.getFullYear() - 2,00,01,-8,0,0,0)
+console.log("Here is the current date’s year minus 1");
+console.log(startDate.getFullYear());
+console.log(startDate);
 
 var newDate = currentDate.toISOString().split(".")[0];
 var refDate = startDate.toISOString().split(".")[0];
@@ -29,32 +31,21 @@ var refDate = startDate.toISOString().split(".")[0];
   console.log("Reference Date:")
   console.log(refDate);
 
-// Initialize google map and find the crimes
-function initMap() {
+function autocomplete() {
   $(hist_stats).hide();
-  $(map).hide();
-  // Assign center los angeles to new google map and get user input location
-  var map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 11,
-    center: losAngeles
-    });
 
   // Creates a LatLngBounds object to use as a bounds area for autocomplete
   // Uses northeast and southwest coordinates
-  var LAcoordinates = new google.maps.LatLngBounds(
+  LAcoordinates = new google.maps.LatLngBounds(
     new google.maps.LatLng(33.3427,-118.8513),
     new google.maps.LatLng(34.8146,-117.6596)
     );
     console.log('LAcoordinates is: ' + JSON.stringify(LAcoordinates));
-
-  //sets up autocomplete feature with options specified
+  var autocomplete = new google.maps.places.Autocomplete(input,mapOptions);
   var mapOptions = {
     bounds: LAcoordinates,
     strictBounds: true
     };
-  var autocomplete = new google.maps.places.Autocomplete(input,mapOptions);
-
-  // Create a listener event called 'place_changed' and create place variable
   autocomplete.addListener('place_changed', function() {
     place = autocomplete.getPlace();
 
@@ -64,109 +55,8 @@ function initMap() {
       window.alert(place.name + " is outside of the acceptable LA boundary");
       }
 
-    // If placeMarker and crimeMarkers have value then make values null/empty.
-    // placeMarker is an object and crimeMarkers is an array
-    if (placeMarker) {
-        setMapOnPlace();
-        placeMarker = null;
-      }
-    if (crimeMarkers.length > 0) {
-        setMapOnCrime();
-        crimeMarkers = [];
-      }
-
-    // Set marker for place variable with selected parameters
-    // zIndex establishes view order for marker to bring it to top
-    placeMarker = new google.maps.Marker({
-      map: map,
-      position: place.geometry.location,
-      zIndex: google.maps.Marker.MAX_ZINDEX,
-      icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-      });
-      console.log(place.geometry.location.lat());
-      console.log(place.geometry.location.lng());
-
-    // Get window bounds and plug into whenString parameter for ajax call in findCrimes
-    var currentBounds = map.getBounds();
-      console.log("currentBounds is: ");
-      console.log(currentBounds);
-      console.log(currentBounds.f.f);
-      console.log(currentBounds.b.b);
-      console.log(currentBounds.f.b);
-      console.log(currentBounds.b.f);
-      console.log(JSON.stringify(place.geometry.location));
-      console.log("end");
-    whenString = "date_occ between '"+refDate+"' and '"+newDate+"' and within_box(location_1,"+currentBounds.f.f+","+currentBounds.b.b+","+currentBounds.f.b+","+currentBounds.b.f+")";
-      console.log("decoded string:");
-      console.log(whenString);
-    findCrimes();
-
-    // Create blank arrays to push data into the chart
-    // Runs through crimes array, if data is within window bounds, then populate chart arrays
-    var DR_numbers = [];
-    var months = [];
-    var years = [];
-    crimes.forEach(function(crimeMarker){
-      if (currentBounds.contains(new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]))) {
-        crimeMarkers.push(new google.maps.Marker({
-          map: map,
-          position: new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]),
-          icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
-          }));
-        DR_numbers.push(crimeMarker["DR_number"]);
-        months.push(crimeMarker["month"]);
-        years.push(crimeMarker["year"]);
-        }
-      })
-    // console.log(monthly_data);
-    console.log(DR_numbers.length);
-
-    getMonthData(months,years,DR_numbers);
-    console.log("getMOnth ran");
-
-    google.charts.load('current', {'packages':['corechart']});
-    // google.charts.setOnLoadCallback(drawVisualization);
-
-    var currentData = [];
-    currentData.push(year_array);
-    for(i=0;i<monthData.length;i++){currentData.push(monthData[i])}
-    google.charts.setOnLoadCallback(drawVisualization);
-    console.log(JSON.stringify(currentData));
-    function drawVisualization() {
-    currentData = google.visualization.arrayToDataTable(currentData);
-
-    var chartOptions = {
-      title : 'has it gotten better?',
-      color: 'red',
-      lineWidth: 2,
-      vAxis: {title: '# Crimes', gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
-      hAxis: {title: 'Month', gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
-      seriesType: 'bars',
-      backgroundColor: '#212529',
-      series: {3: {type: 'line', pointShape: 'triangle', pointSize: 10, color: '#E5E5E5'}},
-      legend: {position: 'top', textStyle: {color: '#E5E5E5', fontSize: 16}, alignment: 'center'}
-      };
-
-    var chart = new google.visualization.ComboChart(document.getElementById('hist_stats'));
-    chart.draw(currentData, chartOptions);
-  };
-    $(hist_stats).show();
-
-    console.log(typeof currentData);
-    console.log(currentData);
-    console.log("updated_visualization");
-
-    // Set map to center of place variable and zoom
-    map.setCenter(place.geometry.location);
-    map.setZoom(15);
-    // $(map).show();
-
-    // END add listener function
-    });
-
-}
-
-// Functions to transform crime data receievd from API
+    setMap();
+  })}
 function getMonthName(number){
   if (number === 1) {return "January";}
   else if (number === 2) {return "February";}
@@ -342,7 +232,6 @@ function getMonthData(months,years,DR_numbers){
   }
   year_array.push("avg");
 }
-// Function to set placeMarker and crimeMarkers array on map
 function setMapOnPlace() {
   placeMarker.setMap();
   }
@@ -391,10 +280,101 @@ function findCrimes() {
       return crimes;
     });
 }
+function setMap(){
+  // Assign center los angeles to new google map and get user input location
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 15,
+    center: place.geometry.location
+    });
+
+  // Get window bounds and plug into whenString parameter for ajax call in findCrimes
+  var currentBounds = map.getBounds();
+    console.log("currentBounds is: ");
+    console.log(currentBounds);
+    console.log(currentBounds.f.f);
+    console.log(currentBounds.b.b);
+    console.log(currentBounds.f.b);
+    console.log(currentBounds.b.f);
+    console.log(JSON.stringify(place.geometry.location));
+    console.log("end");
+  whenString = "date_occ between '"+refDate+"' and '"+newDate+"' and within_box(location_1,"+currentBounds.f.f+","+currentBounds.b.b+","+currentBounds.f.b+","+currentBounds.b.f+")";
+    console.log("decoded string:");
+    console.log(whenString);
+  findCrimes();
+
+  // If placeMarker and crimeMarkers have value then make values null/empty.
+  // placeMarker is an object and crimeMarkers is an array
+  if (placeMarker) {
+      setMapOnPlace();
+      placeMarker = null;
+    }
+  if (crimeMarkers.length > 0) {
+      setMapOnCrime();
+      crimeMarkers = [];
+    }
+
+  // Set marker for place variable with selected parameters
+  // zIndex establishes view order for marker to bring it to top
+  placeMarker = new google.maps.Marker({
+    map: map,
+    position: place.geometry.location,
+    zIndex: google.maps.Marker.MAX_ZINDEX,
+    icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+    });
+    console.log(place.geometry.location.lat());
+    console.log(place.geometry.location.lng());
+
+    crimes.forEach(function(crimeMarker){
+      if (currentBounds.contains(new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]))) {
+        crimeMarkers.push(new google.maps.Marker({
+          map: map,
+          position: new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]),
+          icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+          }));
+        DR_numbers.push(crimeMarker["DR_number"]);
+        months.push(crimeMarker["month"]);
+        years.push(crimeMarker["year"]);
+        }
+      })
+    renderChart();
+}
+function renderChart(){
+  getMonthData(months,years,DR_numbers);
+  console.log("getMOnth ran");
+
+  google.charts.load('current', {'packages':['corechart']});
+  // google.charts.setOnLoadCallback(drawVisualization);
+
+  var currentData = [];
+  currentData.push(year_array);
+  for(i=0;i<monthData.length;i++){currentData.push(monthData[i])}
+  google.charts.setOnLoadCallback(drawVisualization);
+  console.log(JSON.stringify(currentData));
+  function drawVisualization() {
+    currentData = google.visualization.arrayToDataTable(currentData);
+
+    var chartOptions = {
+      title : 'has it gotten better?',
+      color: 'red',
+      lineWidth: 2,
+      vAxis: {title: '# Crimes', gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
+      hAxis: {title: 'Month', gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
+      seriesType: 'bars',
+      backgroundColor: '#212529',
+      series: {3: {type: 'line', pointShape: 'triangle', pointSize: 10, color: '#E5E5E5'}},
+      legend: {position: 'top', textStyle: {color: '#E5E5E5', fontSize: 16}, alignment: 'center'}
+      };
+
+    var chart = new google.visualization.ComboChart(document.getElementById('hist_stats'));
+    chart.draw(currentData, chartOptions);
+    }
+  $(hist_stats).show();
+}
 
 function renderPage() {
   google.charts.load('current', {'packages':['corechart']});
-  initMap();
+  // initMap();
+  autocomplete();
 }
 
 $(renderPage);
