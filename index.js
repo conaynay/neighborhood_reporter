@@ -20,10 +20,9 @@ var DR_numbers = [];
 var months = [];
 var years = [];
 var startDate = new Date(currentDate.getFullYear() - 2,00,01,-8,0,0,0)
-console.log("Here is the current date’s year minus 1");
-console.log(startDate.getFullYear());
-console.log(startDate);
-
+  console.log("Here is the current date’s year minus 1");
+  console.log(startDate.getFullYear());
+  console.log(startDate);
 var newDate = currentDate.toISOString().split(".")[0];
 var refDate = startDate.toISOString().split(".")[0];
   console.log("Today’s date:");
@@ -41,11 +40,13 @@ function autocomplete() {
     new google.maps.LatLng(34.8146,-117.6596)
     );
     console.log('LAcoordinates is: ' + JSON.stringify(LAcoordinates));
-  var autocomplete = new google.maps.places.Autocomplete(input,mapOptions);
+
+  // Defines parameters for autocomplete and creates new object
   var mapOptions = {
     bounds: LAcoordinates,
     strictBounds: true
     };
+  var autocomplete = new google.maps.places.Autocomplete(input,mapOptions);
   autocomplete.addListener('place_changed', function() {
     place = autocomplete.getPlace();
 
@@ -54,36 +55,92 @@ function autocomplete() {
     if (!place.geometry) {
       window.alert(place.name + " is outside of the acceptable LA boundary");
       }
-
-    setMap();
+    else {
+      setMap();
+    }
   })}
+function setMapOnPlace() {
+  placeMarker.setMap();
+  }
+function setMapOnCrime() {
+  crimeMarkers.forEach(function(crime){
+    crime.setMap(null);
+  })
+  }
 function getMonthName(number){
-  if (number === 1) {return "January";}
-  else if (number === 2) {return "February";}
-  else if (number === 3) {return "March";}
-  else if (number === 4) {return "April";}
-  else if (number === 5) {return "May";}
-  else if (number === 6) {return "June";}
-  else if (number === 7) {return "July";}
-  else if (number === 8) {return "August";}
-  else if (number === 9) {return "September";}
-  else if (number === 10) {return "October";}
-  else if (number === 11) {return "November";}
-  else if (number === 12) {return "December";}
-  else {return "Unknown";}
+  switch (number){
+    case number === 1:
+      return "January";
+      break;
+    case number === 2:
+      return "February";
+      break;
+    case number === 3:
+      return "March";
+      break;
+    case number === 4:
+      return "April";
+      break;
+    case number === 5:
+      return "May";
+      break;
+    case number === 6:
+      return "June";
+      break;
+    case number === 7:
+      return "July";
+      break;
+    case number === 8:
+      return "August";
+      break;
+    case number === 9:
+      return "September";
+      break;
+    case number === 10:
+      return "October";
+      break;
+    case number === 11:
+      return "November";
+      break;
+    case number === 12:
+      return "December";
+      break;
+    default:
+      return "Unknown";
+  }
 }
 function bucketAge(age){
-  if (age >= 0 && age < 10) {return "under 10";}
-  else if (age >= 10 && age < 20) {return "10-19";}
-  else if (age >= 20 && age < 30) {return "20-29";}
-  else if (age >= 30 && age < 40) {return "30-39";}
-  else if (age >= 40 && age < 50) {return "40-49";}
-  else if (age >= 50 && age < 60) {return "50-59";}
-  else if (age >= 60 && age < 70) {return "60-69";}
-  else if (age >= 70 && age < 80) {return "70-79";}
-  else if (age >= 80 && age < 90) {return "80-89";}
-  else if (age >=90) {return "90+";}
-  else {return "Unknown";}
+  switch (age) {
+    case age >= 0 && age < 10:
+      return "under 10";
+      break;
+    case age >= 10 && age < 20:
+      return "10-19";
+      break;
+    case age >= 20 && age < 30:
+      return "20-29";
+      break;
+    case age >= 30 && age < 40:
+      return "30-39";
+      break;
+    case age >= 40 && age < 50:
+      return "40-49";
+      break;
+    case age >= 50 && age < 60:
+      return "50-59";
+      break;
+    case age >= 60 && age < 70:
+      return "60-69";
+      break;
+    case age >= 70 && age < 80:
+      return "70-79";
+      break;
+    case age >= 80 && age < 90:
+      return "80-89";
+      break;
+    default:
+      return "unknown";
+  }
 }
 function findGender(sex){
   if (sex === "F") {gender = "Female"}
@@ -182,7 +239,7 @@ function getMonth(date){
 function getYear(date){
   return Number(date.substring(0,10).split(/-/)[0]);
 }
-function getMonthData(months,years,DR_numbers){
+function getMonthData(months,years){
   var max_year = Math.max.apply(null,years);
   year_array = ["month",(max_year-2).toString(),(max_year-1).toString(),max_year.toString()];
   monthData = [
@@ -212,11 +269,7 @@ function getMonthData(months,years,DR_numbers){
       monthData[months[i]-1][3] += 1;
       no_crimes += 1;
     }
-    // else {
-    //   // console.log("could not getMonthData for: " + years[i] + " in " + DR_numbers[i]);
-    //   return no_crimes
-    // }
-  }
+    }
   var current_max = 0;
   for (i = 0; i < monthData.length; i++){
     var sum = monthData[i][1]+monthData[i][2]+monthData[i][3]+monthData[i][4]+monthData[i][5];
@@ -232,21 +285,14 @@ function getMonthData(months,years,DR_numbers){
   }
   year_array.push("avg");
 }
-function setMapOnPlace() {
-  placeMarker.setMap();
-  }
-function setMapOnCrime() {
-  crimeMarkers.forEach(function(crime){
-    crime.setMap(null);
-  })
-  }
 function findCrimes() {
+  console.log("findCrimes ran");
   $.ajax({
       url: `https://data.lacity.org/resource/7fvc-faax.json`,
       // ?$where=date between '2015-01-10T12:00:00' and '2015-01-10T14:00:00'
       type: "GET",
       data: {
-        "$limit" : 10000,
+        "$limit" : 30000,
         "$$app_token" : "Dhj5YCkjjtNfUHELSklScfzCw",
         "$where"  : whenString
       }
@@ -255,95 +301,101 @@ function findCrimes() {
       data.forEach(function(item){
         // console.log(item.dr_no);
         if (item.location_1){
-        crimes.push({
-          "DR_number": item.dr_no,
-          "area": item.area_name,
-          "crime": item.crm_cd_desc,
-          "date": item.date_occ,
-          "month": getMonth(item.date_occ),
-          "year": getYear(item.date_occ),
-          "time": findTime(item.time_occ),
-          "hour": roundHour(item.time_occ),
-          "time_military": item.time_occ,
-          "race": findRace(item.vict_descent),
-          "race_descent": item.vict_descent,
-          "age": item.vict_age,
-          "gender": findGender(item.vict_sex),
-          "gender_sex": item.vict_sex,
-          "lat":item.location_1.coordinates[1],
-          "lng":item.location_1.coordinates[0]
-          })
+          crimes.push({
+            "DR_number": item.dr_no,
+            "area": item.area_name,
+            "crime": item.crm_cd_desc,
+            "date": item.date_occ,
+            "month": new Date(item.date_occ).getMonth(),
+            "year": new Date(item.date_occ).getFullYear(),
+            // "time": findTime(item.time_occ),
+            // "hour": roundHour(item.time_occ),
+            "time_military": item.time_occ,
+            // "race": findRace(item.vict_descent),
+            "race_descent": item.vict_descent,
+            "age": item.vict_age,
+            // "gender": findGender(item.vict_sex),
+            "gender_sex": item.vict_sex,
+            "lat":item.location_1.coordinates[1],
+            "lng":item.location_1.coordinates[0]
+            });
         }
         });
+        console.log("new months");
+        console.log(months);
         console.log("crimes is: ");
         console.log(crimes);
-      return crimes;
+      // return crimes;
     });
 }
 function setMap(){
-  // Assign center los angeles to new google map and get user input location
+  console.log("setMap ran");
+
+  // create new map on id="map" element with zoom centered on place
   map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 15,
+    zoom: 16,
     center: place.geometry.location
     });
 
-  // Get window bounds and plug into whenString parameter for ajax call in findCrimes
-  var currentBounds = map.getBounds();
-    console.log("currentBounds is: ");
-    console.log(currentBounds);
-    console.log(currentBounds.f.f);
-    console.log(currentBounds.b.b);
-    console.log(currentBounds.f.b);
-    console.log(currentBounds.b.f);
-    console.log(JSON.stringify(place.geometry.location));
-    console.log("end");
-  whenString = "date_occ between '"+refDate+"' and '"+newDate+"' and within_box(location_1,"+currentBounds.f.f+","+currentBounds.b.b+","+currentBounds.f.b+","+currentBounds.b.f+")";
-    console.log("decoded string:");
-    console.log(whenString);
-  findCrimes();
+  var currentBounds;
+  google.maps.event.addListener(map,'bounds_changed',function(){
+    // Get window bounds and plug into whenString parameter for ajax call in findCrimes
+    currentBounds = map.getBounds();
+      console.log("currentBounds is: ");
+      console.log(currentBounds);
+      console.log(currentBounds.f.f);
+      console.log(currentBounds.b.b);
+      console.log(currentBounds.f.b);
+      console.log(currentBounds.b.f);
+      console.log(JSON.stringify(place.geometry.location));
+      console.log("end");
+    whenString = "date_occ between '"+refDate+"' and '"+newDate+"' and within_box(location_1,"+currentBounds.f.f+","+currentBounds.b.b+","+currentBounds.f.b+","+currentBounds.b.f+")";
+      console.log("decoded string:");
+      console.log(whenString);
 
-  // If placeMarker and crimeMarkers have value then make values null/empty.
-  // placeMarker is an object and crimeMarkers is an array
-  if (placeMarker) {
-      setMapOnPlace();
-      placeMarker = null;
-    }
-  if (crimeMarkers.length > 0) {
-      setMapOnCrime();
-      crimeMarkers = [];
-    }
+    // If placeMarker and crimeMarkers have value then make values null/empty.
+    // placeMarker is an object and crimeMarkers is an array
+    if (placeMarker) {
+        setMapOnPlace();
+        placeMarker = null;
+      }
+    if (crimeMarkers.length > 0) {
+        setMapOnCrime();
+        crimeMarkers = [];
+      }
 
-  // Set marker for place variable with selected parameters
-  // zIndex establishes view order for marker to bring it to top
-  placeMarker = new google.maps.Marker({
-    map: map,
-    position: place.geometry.location,
-    zIndex: google.maps.Marker.MAX_ZINDEX,
-    icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-    });
-    console.log(place.geometry.location.lat());
-    console.log(place.geometry.location.lng());
+    findCrimes();
 
-    crimes.forEach(function(crimeMarker){
-      if (currentBounds.contains(new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]))) {
+    renderChart();
+    // Set marker for place variable with selected parameters
+    // zIndex establishes view order for marker to bring it to top
+    placeMarker = new google.maps.Marker({
+      map: map,
+      position: place.geometry.location,
+      zIndex: google.maps.Marker.MAX_ZINDEX,
+      icon: 'blue-dot.png'
+      });
+      console.log(place.geometry.location.lat());
+      console.log(place.geometry.location.lng());
+
+      months = [];
+      years = [];
+      crimes.forEach(function(crimeMarker){
         crimeMarkers.push(new google.maps.Marker({
           map: map,
           position: new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]),
-          icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+          icon: 'red-dot.png'
           }));
-        DR_numbers.push(crimeMarker["DR_number"]);
+        // DR_numbers.push(crimeMarker["DR_number"]);
         months.push(crimeMarker["month"]);
         years.push(crimeMarker["year"]);
-        }
-      })
-    renderChart();
+        })
+      map.setZoom(16);
+  })
 }
 function renderChart(){
-  getMonthData(months,years,DR_numbers);
-  console.log("getMOnth ran");
-
-  google.charts.load('current', {'packages':['corechart']});
-  // google.charts.setOnLoadCallback(drawVisualization);
+  getMonthData(months,years);
+  console.log("getMonth ran");
 
   var currentData = [];
   currentData.push(year_array);
@@ -373,7 +425,6 @@ function renderChart(){
 
 function renderPage() {
   google.charts.load('current', {'packages':['corechart']});
-  // initMap();
   autocomplete();
 }
 
