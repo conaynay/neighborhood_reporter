@@ -29,6 +29,7 @@ var refDate = startDate.toISOString().split(".")[0];
   console.log(newDate);
   console.log("Reference Date:")
   console.log(refDate);
+var markers;
 
 function autocomplete() {
   $(hist_stats).hide();
@@ -56,14 +57,14 @@ function autocomplete() {
       window.alert(place.name + " is outside of the acceptable LA boundary");
       }
     else {
-      setMap();
+      generateMap();
     }
   })}
 function setMapOnPlace() {
   placeMarker.setMap();
   }
 function setMapOnCrime() {
-  crimeMarkers.forEach(function(crime){
+  markers.forEach(function(crime){
     crime.setMap(null);
   })
   }
@@ -240,6 +241,7 @@ function getYear(date){
   return Number(date.substring(0,10).split(/-/)[0]);
 }
 function getMonthData(months,years){
+  console.log("getMonthData ran");
   var max_year = Math.max.apply(null,years);
   year_array = ["month",(max_year-2).toString(),(max_year-1).toString(),max_year.toString()];
   monthData = [
@@ -285,60 +287,26 @@ function getMonthData(months,years){
   }
   year_array.push("avg");
 }
-function findCrimes() {
-  console.log("findCrimes ran");
-  $.ajax({
-      url: `https://data.lacity.org/resource/7fvc-faax.json`,
-      // ?$where=date between '2015-01-10T12:00:00' and '2015-01-10T14:00:00'
-      type: "GET",
-      data: {
-        "$limit" : 30000,
-        "$$app_token" : "Dhj5YCkjjtNfUHELSklScfzCw",
-        "$where"  : whenString
-      }
-    }).done(function(data) {
-      crimes = [];
-      data.forEach(function(item){
-        // console.log(item.dr_no);
-        if (item.location_1){
-          crimes.push({
-            "DR_number": item.dr_no,
-            "area": item.area_name,
-            "crime": item.crm_cd_desc,
-            "date": item.date_occ,
-            "month": new Date(item.date_occ).getMonth(),
-            "year": new Date(item.date_occ).getFullYear(),
-            // "time": findTime(item.time_occ),
-            // "hour": roundHour(item.time_occ),
-            "time_military": item.time_occ,
-            // "race": findRace(item.vict_descent),
-            "race_descent": item.vict_descent,
-            "age": item.vict_age,
-            // "gender": findGender(item.vict_sex),
-            "gender_sex": item.vict_sex,
-            "lat":item.location_1.coordinates[1],
-            "lng":item.location_1.coordinates[0]
-            });
-        }
-        });
-        console.log("new months");
-        console.log(months);
-        console.log("crimes is: ");
-        console.log(crimes);
-      // return crimes;
-    });
-}
-function setMap(){
-  console.log("setMap ran");
 
-  // create new map on id="map" element with zoom centered on place
-  map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 16,
-    center: place.geometry.location
-    });
+function generateMap(){
+
+    // create new map on id="map" element with zoom centered on place
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 16,
+      center: place.geometry.location
+      });
+    console.log("hello");
+   google.maps.event.addListener(map, 'bounds_changed', function() {
+     // console.log(JSON.stringify(map));
+     console.log("hello dear");
+     runMap();
+   });
+}
+
+function runMap(){
+  console.log("runMap ran");
 
   var currentBounds;
-  google.maps.event.addListener(map,'bounds_changed',function(){
     // Get window bounds and plug into whenString parameter for ajax call in findCrimes
     currentBounds = map.getBounds();
       console.log("currentBounds is: ");
@@ -348,7 +316,6 @@ function setMap(){
       console.log(currentBounds.f.b);
       console.log(currentBounds.b.f);
       console.log(JSON.stringify(place.geometry.location));
-      console.log("end");
     whenString = "date_occ between '"+refDate+"' and '"+newDate+"' and within_box(location_1,"+currentBounds.f.f+","+currentBounds.b.b+","+currentBounds.f.b+","+currentBounds.b.f+")";
       console.log("decoded string:");
       console.log(whenString);
@@ -366,36 +333,88 @@ function setMap(){
 
     findCrimes();
 
-    renderChart();
     // Set marker for place variable with selected parameters
     // zIndex establishes view order for marker to bring it to top
-    placeMarker = new google.maps.Marker({
-      map: map,
-      position: place.geometry.location,
-      zIndex: google.maps.Marker.MAX_ZINDEX,
-      icon: 'blue-dot.png'
+    // placeMarker = new google.maps.Marker({
+    //   map: map,
+    //   position: place.geometry.location,
+    //   zIndex: google.maps.Marker.MAX_ZINDEX,
+    //   icon: 'blue-dot.png'
+    //   });
+    //   console.log(place.geometry.location.lat());
+    //   console.log(place.geometry.location.lng());
+
+    crimes.forEach(function(crime){
+      console.log("markers pushing");
+      // crimeMarkers.push(new google.maps.Marker({
+      //   map: map,
+      //   position: new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]),
+      //   icon: 'red-dot.png'
+      //   }));
+      months.push(crime["month"]);
+      years.push(crime["year"]);
+      })
+
+      var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      var markers = crimeMarkers.map(function(location, i) {
+        return new google.maps.Marker({
+          position: location,
+          label: labels[i % labels.length]
+        });
       });
-      console.log(place.geometry.location.lat());
-      console.log(place.geometry.location.lng());
+
+      var markerCluster = new MarkerClusterer(map, markers,
+        {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
 
       months = [];
       years = [];
-      crimes.forEach(function(crimeMarker){
-        crimeMarkers.push(new google.maps.Marker({
-          map: map,
-          position: new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]),
-          icon: 'red-dot.png'
-          }));
-        // DR_numbers.push(crimeMarker["DR_number"]);
-        months.push(crimeMarker["month"]);
-        years.push(crimeMarker["year"]);
-        })
-      map.setZoom(16);
-  })
+      renderChart();
+  }
+function findCrimes() {
+  console.log("findCrimes ran");
+  $.ajax({
+      url: `https://data.lacity.org/resource/7fvc-faax.json`,
+      type: "GET",
+      data: {
+        "$limit" : 1000,
+        "$$app_token" : "Dhj5YCkjjtNfUHELSklScfzCw",
+        "$where"  : whenString
+      }
+    }).done(function(data) {
+      crimes = [];
+      data.forEach(function(item){
+        // console.log(item);
+        if (item.location_1){
+          crimes.push({
+            "lat":item.location_1.coordinates[1],
+            "lng":item.location_1.coordinates[0],
+            "DR_number": item.dr_no,
+            "area": item.area_name,
+            "crime": item.crm_cd_desc,
+            "date": item.date_occ,
+            "month": new Date(item.date_occ).getMonth(),
+            "year": new Date(item.date_occ).getFullYear(),
+            // "time": findTime(item.time_occ),
+            // "hour": roundHour(item.time_occ),
+            "time_military": item.time_occ,
+            // "race": findRace(item.vict_descent),
+            "race_descent": item.vict_descent,
+            "age": item.vict_age,
+            // "gender": findGender(item.vict_sex),
+            "gender_sex": item.vict_sex
+            });
+
+          crimeMarkers.push({"lat": item.location_1.coordinates[1],"lng":item.location_1.coordinates[1]});
+        }
+        });
+        console.log("crimes is: ");
+        console.log(crimes);
+        console.log(crimeMarkers);
+    });
 }
 function renderChart(){
+  console.log("renderChart ran");
   getMonthData(months,years);
-  console.log("getMonth ran");
 
   var currentData = [];
   currentData.push(year_array);
