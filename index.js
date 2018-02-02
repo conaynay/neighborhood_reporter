@@ -35,7 +35,6 @@ function autocomplete() {
     new google.maps.LatLng(33.3427,-118.8513),
     new google.maps.LatLng(34.8146,-117.6596)
     );
-
   // Defines parameters for autocomplete and creates new object
   var mapOptions = {
     bounds: LAcoordinates,
