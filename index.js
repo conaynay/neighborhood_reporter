@@ -25,16 +25,19 @@ var refDate = startDate.toISOString().split(".")[0];
   console.log("Reference Date:")
   console.log(refDate);
 var markers = [];
+var max_year;
 
 function autocomplete() {
   $(hist_stats).hide();
+  $(no_data).hide();
 
   // Creates a LatLngBounds object to use as a bounds area for autocomplete
   // Uses northeast and southwest coordinates
   LAcoordinates = new google.maps.LatLngBounds(
     new google.maps.LatLng(33.3427,-118.8513),
     new google.maps.LatLng(34.8146,-117.6596)
-    );
+    )
+
   // Defines parameters for autocomplete and creates new object
   var mapOptions = {
     bounds: LAcoordinates,
@@ -243,7 +246,7 @@ function getMonthData(months,years){
   console.log("getMonthData ran");
   console.log(months);
   console.log(years);
-  var max_year = Math.max.apply(null,years);
+  max_year = Math.max.apply(null,years);
   year_array = ["month",(max_year-2).toString(),(max_year-1).toString(),max_year.toString()];
   monthData = [
       ["jan",0,0,0],
@@ -292,7 +295,8 @@ function generateMap(){
 
     // create new map on id="map" element with zoom centered on place
     map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 16,
+      zoom: 17,
+      minZoom: 15,
       center: place.geometry.location
       });
     console.log("created new map");
@@ -353,20 +357,36 @@ function runMap(){
     console.log("markers is actually: ");
     console.log(markers);
 
-    setTimeout(function(){
     var markerCluster = new MarkerClusterer(map, markers,
-      {imagePath: 'images/m'});
-    },1000);
-    renderChart();
+      {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+
+    if (crimes.length === 0){
+      $(hist_stats).hide();
+      $(no_data).show();
+      $(summary1).hide();
+      $(summary2).hide();
+      $(summary3).hide();
+      $(".navbar").hide();
+    }
+    else {
+      $(no_data).hide();
+      $(summary1).show();
+      $(summary2).show();
+      $(summary3).show();
+      $(".navbar").show();
+      renderChart();
+      renderSummary();
+    }
   },1000);
   }
+
 function findCrimes() {
   console.log("findCrimes ran");
   $.ajax({
       url: `https://data.lacity.org/resource/7fvc-faax.json`,
       type: "GET",
       data: {
-        "$limit" : 100,
+        "$limit" : 20000,
         "$$app_token" : "Dhj5YCkjjtNfUHELSklScfzCw",
         "$where"  : whenString
       }
@@ -398,7 +418,7 @@ function findCrimes() {
             });
           months.push(new Date(item.date_occ).getMonth());
           years.push(new Date(item.date_occ).getFullYear());
-          crimeMarkers.push({"lat": item.location_1.coordinates[1],"lng":item.location_1.coordinates[1]});
+          crimeMarkers.push({"lat": item.location_1.coordinates[1],"lng":item.location_1.coordinates[0]});
         }
         });
         console.log("crimes is: ");
@@ -420,13 +440,18 @@ function renderChart(){
 
     var chartOptions = {
       title : 'has it gotten better?',
-      color: 'red',
+      titleTextStyle: {color: '#E5E5E5'},
+      color: 'green',
       lineWidth: 2,
       vAxis: {title: '# Crimes', gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
-      hAxis: {title: 'Month', gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
+      hAxis: {gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
       seriesType: 'bars',
-      backgroundColor: '#212529',
-      series: {3: {type: 'line', pointShape: 'triangle', pointSize: 10, color: '#E5E5E5'}},
+      backgroundColor: {fill: 'transparent'},
+      series: {3: {type: 'line', pointShape: 'triangle', pointSize: 10, color: '#E5E5E5'},
+        2: {color: 'dodgerblue',visibleInLegend: false},
+        1: {color: 'purple',visibleInLegend: false},
+        0: {color: 'gold',visibleInLegend: false},
+          },
       legend: {position: 'top', textStyle: {color: '#E5E5E5', fontSize: 16}, alignment: 'center'}
       };
 
@@ -435,10 +460,52 @@ function renderChart(){
     }
   $(hist_stats).show();
 }
-
+function renderSummary(){
+  var year1_total = 0;
+  var year2_total = 0;
+  var year3_total = 0;
+  for (var i in monthData){
+    year1_total += monthData[i][3];
+    year2_total += monthData[i][2];
+    year3_total += monthData[i][1];
+  }
+  if (year1_total > 0){
+    var plural;
+    if (year1_total === 1){plural = ''} else {plural = 's'}
+    $(summary1).show();
+    $(summary1).html("<p style=\"color:dodgerblue\">"+year_array[3]+"</p>"
+    +"<p style=\"color:white;font-size: 16px\">"+year1_total+" crime"+plural+"</p>"
+    );
+  }
+  if (year2_total > 0){
+    var plural;
+    if (year2_total === 1){plural = ''} else {plural = 's'}
+    $(summary2).html("<p style=\"color:purple\">"+year_array[2]+"</p>"
+    +"<p style=\"color:white;font-size: 16px\">"+year2_total+" crime"+plural+"</p>"
+    )
+  }
+  if (year3_total > 0){
+    var plural;
+    if (year3_total === 1){plural = ''} else {plural = 's'}
+    $(summary3).html("<p style=\"color:gold\">"+year_array[1]+"</p>"
+    +"<p style=\"color:white;font-size: 16px\">"+year3_total+" crime"+plural+"</p>"
+    )
+  }
+}
 function renderPage() {
   google.charts.load('current', {'packages':['corechart']});
-  autocomplete();
+  setTimeout(function(){ autocomplete();},300);
 }
+
+$(".navbar").click(function(){
+  if ($(".navbar-brand").html() === "hide map"){
+    $("#map").hide();
+    $(".navbar-brand").html("show map");
+  }
+  else if ($(".navbar-brand").html() === "show map"){
+    $("#map").show();
+    $(".navbar-brand").html("hide map");
+  }
+})
 
 $(renderPage);

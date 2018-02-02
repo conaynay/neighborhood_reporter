@@ -5,6 +5,7 @@
 
 body {
   /* background: url('http://placehold.it/1920x1080') no-repeat center center fixed; */
+  background: url('images/losangeles.jpeg') no-repeat center center fixed;
   background-color: #A9A9A9;
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -24,6 +25,33 @@ section {
 #hist_stats {
   height: 250px;
   padding-top: 20px;
+}
+
+#no_data{
+  text-align: center;
+  color: #E5E5E5;
+  font-size: 30px;
+  display: none;
+}
+
+#summary1{
+  text-align: center;
+  color: 'dodgerblue';
+  font-size: 30px;
+}
+#summary2{
+  text-align: center;
+  color: 'purple';
+  font-size: 30px;
+}
+#summary3{
+  text-align: center;
+  color: 'gold';
+  font-size: 30px;
+}
+
+.navbar{
+  display: none;
 }
 
 .controls {
