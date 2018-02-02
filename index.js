@@ -7,9 +7,6 @@ var monthData = [];
 var no_crimes = 0;
 var currentDate = new Date();
 var whenString = "";
-  console.log(currentDate);
-  console.log("Here is the current date’s year");
-  console.log(currentDate.getFullYear());
 var losAngeles = {lat: 34.048868, lng: -118.252829};
 var placeMarker;
 var crimeMarkers = [];
@@ -19,17 +16,15 @@ var LAcoordinates;
 var DR_numbers = [];
 var months = [];
 var years = [];
-var startDate = new Date(currentDate.getFullYear() - 2,00,01,-8,0,0,0)
-  console.log("Here is the current date’s year minus 1");
-  console.log(startDate.getFullYear());
-  console.log(startDate);
+var startDate = new Date(currentDate.getFullYear() - 2,00,01,0,0,0,0);
+console.log("startDate is: " + startDate);
 var newDate = currentDate.toISOString().split(".")[0];
 var refDate = startDate.toISOString().split(".")[0];
   console.log("Today’s date:");
   console.log(newDate);
   console.log("Reference Date:")
   console.log(refDate);
-var markers;
+var markers = [];
 
 function autocomplete() {
   $(hist_stats).hide();
@@ -40,7 +35,6 @@ function autocomplete() {
     new google.maps.LatLng(33.3427,-118.8513),
     new google.maps.LatLng(34.8146,-117.6596)
     );
-    console.log('LAcoordinates is: ' + JSON.stringify(LAcoordinates));
 
   // Defines parameters for autocomplete and creates new object
   var mapOptions = {
@@ -64,9 +58,15 @@ function setMapOnPlace() {
   placeMarker.setMap();
   }
 function setMapOnCrime() {
+  console.log("markers is: ");
+  console.log(markers);
   markers.forEach(function(crime){
     crime.setMap(null);
+    crime = null;
   })
+  console.log("markers agin is: ");
+  console.log(markers);
+  crimeMarkers =[];
   }
 function getMonthName(number){
   switch (number){
@@ -242,6 +242,8 @@ function getYear(date){
 }
 function getMonthData(months,years){
   console.log("getMonthData ran");
+  console.log(months);
+  console.log(years);
   var max_year = Math.max.apply(null,years);
   year_array = ["month",(max_year-2).toString(),(max_year-1).toString(),max_year.toString()];
   monthData = [
@@ -260,21 +262,21 @@ function getMonthData(months,years){
       ];
   for (i = 0; i < years.length; i++) {
     if(years[i] === max_year - 2) {
-      monthData[months[i]-1][1] += 1;
+      monthData[months[i]][1] += 1;
       no_crimes += 1;
     }
     else if(years[i] === max_year - 1) {
-      monthData[months[i]-1][2] += 1;
+      monthData[months[i]][2] += 1;
       no_crimes += 1;
     }
     else if(years[i] === max_year) {
-      monthData[months[i]-1][3] += 1;
+      monthData[months[i]][3] += 1;
       no_crimes += 1;
     }
     }
   var current_max = 0;
   for (i = 0; i < monthData.length; i++){
-    var sum = monthData[i][1]+monthData[i][2]+monthData[i][3]+monthData[i][4]+monthData[i][5];
+    var sum = monthData[i][1]+monthData[i][2]+monthData[i][3]
     // if (sum > current_max) {current_max = sum} *********PICK UP HERE***********************************************************************************
     var count = 0;
     for (j=1;j<monthData[i].length;j++){
@@ -282,12 +284,11 @@ function getMonthData(months,years){
         count += 1;
       }
     }
-    var average = sum/count;
+    var average = Math.round(sum/count);
     monthData[i].push(average);
   }
   year_array.push("avg");
 }
-
 function generateMap(){
 
     // create new map on id="map" element with zoom centered on place
@@ -295,14 +296,13 @@ function generateMap(){
       zoom: 16,
       center: place.geometry.location
       });
-    console.log("hello");
+    console.log("created new map");
    google.maps.event.addListener(map, 'bounds_changed', function() {
      // console.log(JSON.stringify(map));
-     console.log("hello dear");
+     console.log("listener ran");
      runMap();
    });
 }
-
 function runMap(){
   console.log("runMap ran");
 
@@ -328,47 +328,38 @@ function runMap(){
       }
     if (crimeMarkers.length > 0) {
         setMapOnCrime();
-        crimeMarkers = [];
       }
 
     findCrimes();
 
     // Set marker for place variable with selected parameters
     // zIndex establishes view order for marker to bring it to top
-    // placeMarker = new google.maps.Marker({
-    //   map: map,
-    //   position: place.geometry.location,
-    //   zIndex: google.maps.Marker.MAX_ZINDEX,
-    //   icon: 'blue-dot.png'
-    //   });
-    //   console.log(place.geometry.location.lat());
-    //   console.log(place.geometry.location.lng());
-
-    crimes.forEach(function(crime){
-      console.log("markers pushing");
-      // crimeMarkers.push(new google.maps.Marker({
-      //   map: map,
-      //   position: new google.maps.LatLng(crimeMarker["lat"],crimeMarker["lng"]),
-      //   icon: 'red-dot.png'
-      //   }));
-      months.push(crime["month"]);
-      years.push(crime["year"]);
-      })
-
-      var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      var markers = crimeMarkers.map(function(location, i) {
-        return new google.maps.Marker({
-          position: location,
-          label: labels[i % labels.length]
-        });
+    placeMarker = new google.maps.Marker({
+        map: map,
+        position: place.geometry.location,
+        zIndex: google.maps.Marker.MAX_ZINDEX,
+        icon: 'blue-dot.png'
       });
+      console.log(place.geometry.location.lat());
+      console.log(place.geometry.location.lng());
 
-      var markerCluster = new MarkerClusterer(map, markers,
-        {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+    setTimeout(function(){
+    var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    markers = crimeMarkers.map(function(location, i) {
+      return new google.maps.Marker({
+        position: location,
+        label: labels[i % labels.length]
+      });
+    });
+    console.log("markers is actually: ");
+    console.log(markers);
 
-      months = [];
-      years = [];
-      renderChart();
+    setTimeout(function(){
+    var markerCluster = new MarkerClusterer(map, markers,
+      {imagePath: 'images/m'});
+    },1000);
+    renderChart();
+  },1000);
   }
 function findCrimes() {
   console.log("findCrimes ran");
@@ -376,12 +367,15 @@ function findCrimes() {
       url: `https://data.lacity.org/resource/7fvc-faax.json`,
       type: "GET",
       data: {
-        "$limit" : 1000,
+        "$limit" : 100,
         "$$app_token" : "Dhj5YCkjjtNfUHELSklScfzCw",
         "$where"  : whenString
       }
     }).done(function(data) {
       crimes = [];
+      crimeMarkers = [];
+      months = [];
+      years = [];
       data.forEach(function(item){
         // console.log(item);
         if (item.location_1){
@@ -392,8 +386,8 @@ function findCrimes() {
             "area": item.area_name,
             "crime": item.crm_cd_desc,
             "date": item.date_occ,
-            "month": new Date(item.date_occ).getMonth(),
-            "year": new Date(item.date_occ).getFullYear(),
+            // "month": new Date(item.date_occ).getMonth(),
+            // "year": new Date(item.date_occ).getFullYear(),
             // "time": findTime(item.time_occ),
             // "hour": roundHour(item.time_occ),
             "time_military": item.time_occ,
@@ -403,7 +397,8 @@ function findCrimes() {
             // "gender": findGender(item.vict_sex),
             "gender_sex": item.vict_sex
             });
-
+          months.push(new Date(item.date_occ).getMonth());
+          years.push(new Date(item.date_occ).getFullYear());
           crimeMarkers.push({"lat": item.location_1.coordinates[1],"lng":item.location_1.coordinates[1]});
         }
         });
