@@ -45,7 +45,9 @@ function autocomplete() {
     };
   var autocomplete = new google.maps.places.Autocomplete(input,mapOptions);
   autocomplete.addListener('place_changed', function() {
-    place = autocomplete.getPlace();
+      $("#map").show();
+      $(".navbar-brand").html("hide map");
+      place = autocomplete.getPlace();
 
     // User entered the name of a Place that was not suggested and
     // pressed the Enter key, or the Place Details request failed.
@@ -366,7 +368,8 @@ function runMap(){
       $(summary1).hide();
       $(summary2).hide();
       $(summary3).hide();
-      $(".navbar").hide();
+      $("#map").show();
+      $(".navbar-brand").html("hide map");
     }
     else {
       $(no_data).hide();
