@@ -8,7 +8,7 @@ for the current year and two previous years for within the bounds of the map win
 sums for each year as well as an average per month statistic. Totals are displayed per year as well. Users are able to
 reposition the map manually using the drag or zoom features (with zoom bounds to preserve data integrity). Each reposition
 refreshes the crime data displayed on the page. Users are also presented with markers and clusters on the map in order to
-visualize the crime density in their chosen areas.
+visualize the crime density in their chosen areas. A user may choose to hide or show the map.
 
 Technologies used: HTML/CSS/JavaScript/jQuery
 This page utilizes Google Maps, Google Charts, and data from data.lacity.org (Crimes 2010-Present)
