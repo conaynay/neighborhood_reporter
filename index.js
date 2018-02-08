@@ -442,7 +442,7 @@ function renderChart(){
     currentData = google.visualization.arrayToDataTable(currentData);
 
     var chartOptions = {
-      title : 'has it gotten better?',
+      // title : 'has it gotten better?',
       titleTextStyle: {color: '#E5E5E5'},
       color: 'green',
       lineWidth: 2,
@@ -477,21 +477,21 @@ function renderSummary(){
     if (year1_total === 1){plural = ''} else {plural = 's'}
     $(summary1).show();
     $(summary1).html("<p style=\"color:dodgerblue\">"+year_array[3]+"</p>"
-    +"<p style=\"color:white;font-size: 16px\">"+year1_total+" crime"+plural+"</p>"
+    +"<p style=\"color:white;font-size: 16px\">"+year1_total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+" crime"+plural+"</p>"
     );
   }
   if (year2_total > 0){
     var plural;
     if (year2_total === 1){plural = ''} else {plural = 's'}
     $(summary2).html("<p style=\"color:purple\">"+year_array[2]+"</p>"
-    +"<p style=\"color:white;font-size: 16px\">"+year2_total+" crime"+plural+"</p>"
+    +"<p style=\"color:white;font-size: 16px\">"+year2_total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+" crime"+plural+"</p>"
     )
   }
   if (year3_total > 0){
     var plural;
     if (year3_total === 1){plural = ''} else {plural = 's'}
     $(summary3).html("<p style=\"color:gold\">"+year_array[1]+"</p>"
-    +"<p style=\"color:white;font-size: 16px\">"+year3_total+" crime"+plural+"</p>"
+    +"<p style=\"color:white;font-size: 16px\">"+year3_total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")+" crime"+plural+"</p>"
     )
   }
 }
