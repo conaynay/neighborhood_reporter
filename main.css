@@ -38,22 +38,33 @@ section {
   text-align: center;
   color: 'dodgerblue';
   font-size: 30px;
+  font-weight: 600;
 }
 #summary2{
   text-align: center;
   color: 'purple';
   font-size: 30px;
+  font-weight: 600;
 }
 #summary3{
   text-align: center;
   color: 'gold';
   font-size: 30px;
+  font-weight: 600;
 }
 
-.navbar{
+#map-toggle{
   display: none;
+  background-color: #0E79BF;
   width: 20%;
   left: 8%;
+  border-radius: 10px;
+  text-align: center;
+}
+
+#map-toggle:hover{
+  background-color: #1B94E5;
+  cursor: pointer;
 }
 
 .controls {

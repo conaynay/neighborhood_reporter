@@ -46,7 +46,7 @@ function autocomplete() {
   var autocomplete = new google.maps.places.Autocomplete(input,mapOptions);
   autocomplete.addListener('place_changed', function() {
       $("#map").show();
-      $(".navbar-brand").html("hide map");
+      $("#map-toggle").html("hide map");
       place = autocomplete.getPlace();
 
     // User entered the name of a Place that was not suggested and
@@ -369,14 +369,14 @@ function runMap(){
       $(summary2).hide();
       $(summary3).hide();
       $("#map").show();
-      $(".navbar-brand").html("hide map");
+      $("#map-toggle").html("hide map");
     }
     else {
       $(no_data).hide();
       $(summary1).show();
       $(summary2).show();
       $(summary3).show();
-      $(".navbar").show();
+      $("#map-toggle").show();
       renderChart();
       renderSummary();
     }
@@ -442,18 +442,15 @@ function renderChart(){
     currentData = google.visualization.arrayToDataTable(currentData);
 
     var chartOptions = {
-      // title : 'has it gotten better?',
-      titleTextStyle: {color: '#E5E5E5'},
-      color: 'green',
       lineWidth: 2,
-      vAxis: {title: '# Crimes', gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
-      hAxis: {gridlines: {count: 0}, textStyle: {color: "#E5E5E5"}},
+      vAxis: {title: '# Crimes', gridlines: {count: 0}, titleTextStyle: {color: '#FEDC74', auraColor: '#DA4327', fontSize: 16}},
+      hAxis: {gridlines: {count: 0}, textStyle: {color: "#A9D1ED", fontSize: 24, bold: true, auraColor: "dodgerblue"}},
       seriesType: 'bars',
       backgroundColor: {fill: 'transparent'},
-      series: {3: {type: 'line', pointShape: 'triangle', pointSize: 10, color: '#E5E5E5'},
+      series: {3: {type: 'line', pointShape: 'triangle', pointSize: 10, color: '#207AB7'},
         2: {color: 'dodgerblue',visibleInLegend: false},
         1: {color: 'purple',visibleInLegend: false},
-        0: {color: 'gold',visibleInLegend: false},
+        0: {color: 'gold',visibleInLegend: false}
           },
       legend: {position: 'top', textStyle: {color: '#E5E5E5', fontSize: 16}, alignment: 'center'}
       };
@@ -500,14 +497,14 @@ function renderPage() {
   setTimeout(function(){ autocomplete();},300);
 }
 
-$(".navbar").click(function(){
-  if ($(".navbar-brand").html() === "hide map"){
+$("#map-toggle").click(function(){
+  if ($("#map-toggle").html() === "hide map"){
     $("#map").hide();
-    $(".navbar-brand").html("show map");
+    $("#map-toggle").html("show map");
   }
-  else if ($(".navbar-brand").html() === "show map"){
+  else if ($("#map-toggle").html() === "show map"){
     $("#map").show();
-    $(".navbar-brand").html("hide map");
+    $("#map-toggle").html("hide map");
   }
 })
 
