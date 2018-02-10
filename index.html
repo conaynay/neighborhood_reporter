@@ -22,23 +22,15 @@
 
   <body>
 
-    <!-- Navigation -->
-    <!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-bottom">
-      <div class="container">
-        <a class="navbar-brand" href="#">hide map</a>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-        </div>
-      </div>
-    </nav> -->
-
     <!-- Page Content -->
     <section>
       <div class="container-fluid">
         <div class="row">
           <div class="col">
             <h1 class="mt-5">neighborhood reporter</h1>
-            <input id="pac-input" class="controls col-md-12" type="text"
+            <input id="pac-input" class="controls col-md-4" type="text"
                     placeholder="Enter a location">
+            <h5 id="desc" class="col-md-12">Find the latest crime numbers for your Los Angeles neighborhood.</h5><br>
             <div class="row">
               <div class="col">
                 <div id="summary1" class=".col-lg-4" alt="latest year crime total"></div>
@@ -67,10 +59,12 @@
 
     <script src="markerclusterer.js"></script>
     <script src="jquery.js"></script>
-    <script async defer
+    <!-- <script async defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArZpEUGDIZYYfJK2DyDPoYKOAO3p-R6PY&libraries=places,geometry">
+    </script> -->
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeB2kTnW-E7eM6NtvRaYBbHTz4X4UZ6Yo&libraries=places,geometry">
     </script>
-
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="index.js"></script>
   </body>

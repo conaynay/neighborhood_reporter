@@ -391,7 +391,7 @@ function findCrimes() {
       data: {
         "$limit" : 20000,
         "$$app_token" : "Dhj5YCkjjtNfUHELSklScfzCw",
-        "$where"  : whenString
+        "$where"  : whenString,
       }
     }).done(function(data) {
       crimes = [];
@@ -443,8 +443,8 @@ function renderChart(){
 
     var chartOptions = {
       lineWidth: 2,
-      vAxis: {title: '# Crimes', gridlines: {count: 0}, titleTextStyle: {color: '#FEDC74', auraColor: '#DA4327', fontSize: 16}},
-      hAxis: {gridlines: {count: 0}, textStyle: {color: "#A9D1ED", fontSize: 24, bold: true, auraColor: "dodgerblue"}},
+      vAxis: {title: '# Crimes', gridlines: {count: 0}, titleTextStyle: {color: '#FEDC74', auraColor: 'black', fontSize: 16}},
+      hAxis: {gridlines: {count: 0}, textStyle: {color: "dodgerblue", fontSize: 24, bold: true, auraColor: 'black'}},
       seriesType: 'bars',
       backgroundColor: {fill: 'transparent'},
       series: {3: {type: 'line', pointShape: 'triangle', pointSize: 10, color: '#207AB7'},
@@ -494,7 +494,7 @@ function renderSummary(){
 }
 function renderPage() {
   google.charts.load('current', {'packages':['corechart']});
-  setTimeout(function(){ autocomplete();},300);
+  setTimeout(function(){ autocomplete();},800);
 }
 
 $("#map-toggle").click(function(){

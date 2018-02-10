@@ -1,6 +1,7 @@
 * {
   box-sizing: border-box;
   color: #E5E5E5;
+  text-align: center;
 }
 
 body {
@@ -20,6 +21,11 @@ section {
 #map {
  height: 400px;
  top: 20px;
+}
+
+#desc {
+  color: #E5E5E5;
+  /* font-size: 12px; */
 }
 
 #hist_stats {
@@ -58,7 +64,7 @@ section {
   background-color: #0E79BF;
   width: 20%;
   left: 8%;
-  border-radius: 10px;
+  border-radius: 8px;
   text-align: center;
 }
 
